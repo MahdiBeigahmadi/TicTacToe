@@ -57,20 +57,36 @@ def minmax_cutoff(game, state):
     """Given a state in a game, calculate the best move by searching
     forward all the way to the cutoff depth. At that level use evaluation func."""
 
-    player = game.to_move(state)
-
     def max_value(state, d):
-        print("Your code goes here -3pt")
-
-        return 0
+        if game.terminal_test(state):
+            return game.utility(state, game.to_move(state))
+        if d == 0:
+            return game.evaluation_func(state)
+        v = -np.inf
+        for a in game.actions(state):
+            v = max(v, min_value(game.result(state, a), d - 1))
+        return v
 
     def min_value(state, d):
-        print("Your code goes here -2pt")
+        if game.terminal_test(state):
+            return game.utility(state, game.to_move(state))
+        if d == 0:
+            return game.evaluation_func(state)
+        v = np.inf
+        for a in game.actions(state):
+            v = min(v, max_value(game.result(state, a), d - 1))
+        return v
 
-        return 0
+    depth = game.d if game.d > 0 else np.inf
+    highestScore = -np.inf
+    bestPossibleAction = None
+    for a in game.actions(state):
+        value = min_value(game.result(state, a), depth - 1)
+        if value > highestScore:
+            highestScore = value
+            bestPossibleAction = a
+    return bestPossibleAction
 
-    # Body of minmax_cutoff:
-    return max(game.actions(state), key=lambda a: min_value(game.result(state, a), 0), default=None)
 
 # ______________________________________________________________________________
 
@@ -80,28 +96,34 @@ def alpha_beta(game, state):
      this version searches all the way to the leaves."""
     player = game.to_move(state)
 
-    # Functions used by alpha_beta
     def max_value(state, alpha, beta):
         if game.terminal_test(state):
-            return game.utility(state, player)
-        print("Your code goes here -3pt")
-
-        return 0
+            return game.utility(state, player), None
+        value, move = -np.inf, None
+        for action in game.actions(state):
+            secondaryValue, _ = min_value(game.result(state, action), alpha, beta)
+            if secondaryValue > value:
+                value, move = secondaryValue, action
+                alpha = max(alpha, value)
+            if value >= beta:
+                return value, move
+        return value, move
 
     def min_value(state, alpha, beta):
         if game.terminal_test(state):
-            return game.utility(state, player)
-        print("Your code goes here -2pt")
+            return game.utility(state, player), None
+        value, move = np.inf, None
+        for action in game.actions(state):
+            secondaryValue, _ = max_value(game.result(state, action), alpha, beta)
+            if secondaryValue < value:
+                value, move = secondaryValue, action
+                beta = min(beta, value)
+            if value <= alpha:
+                return value, move
+        return value, move
 
-        return 0
-
-    # Body of alpha_beta_search:
-    alpha = -np.inf
-    beta = np.inf
-    best_action = None
-    print("Your code goes here -10pt")
-
-    return best_action
+    _, best_move = max_value(state, -np.inf, np.inf)
+    return best_move
 
 
 def alpha_beta_cutoff(game, state):
@@ -165,7 +187,7 @@ def alpha_beta_player(game, state):
     """Use a method to speed up at the start to avoid search down a long tree with not much outcome.
     Hint: for speedup use random_player for start of the game when you see search time is too long"""
 
-    if( game.timer < 0):
+    if game.timer < 0:
         game.d = -1
         return alpha_beta(game, state)
 
@@ -185,7 +207,7 @@ def minmax_player(game, state):
     """Use a method to speed up at the start to avoid search down a long tree with not much outcome.
     Hint:for speedup use random_player for start of the game when you see search time is too long"""
 
-    if( game.timer < 0):
+    if game.timer < 0:
         game.d = -1
         return minmax(game, state)
 
