@@ -1,10 +1,10 @@
 """Games or Adversarial Search (Chapter 5)"""
 
-import copy
 import random
-from collections import namedtuple
-import numpy as np
 import time
+from collections import namedtuple
+
+import numpy as np
 
 GameState = namedtuple('GameState', 'to_move, move, utility, board, moves')
 
@@ -141,7 +141,7 @@ def alpha_beta_cutoff(game, state):
             if secondaryValue > value:
                 value, move = secondaryValue, action
                 alpha = max(alpha, value)
-            if value >= beta: #beta cut-off
+            if value >= beta:  # beta cut-off
                 break
         return value, move
 
@@ -154,7 +154,7 @@ def alpha_beta_cutoff(game, state):
             if secondaryValue < value:
                 value, move = secondaryValue, action
                 beta = min(beta, value)
-            if value <= alpha:  #alpha cut-off
+            if value <= alpha:  # alpha cut-off
                 break
         return value, move
 
@@ -293,7 +293,7 @@ class TicTacToe(Game):
             self.k = k
         self.d = -1  # d is cutoff depth. Default is -1 meaning no depth limit. It is controlled usually by timer
         self.maxDepth = size * size  # max depth possible is width X height of the board
-        self.timer = t  #timer  in seconds for opponent's search time limit. -1 means unlimited
+        self.timer = t  # timer  in seconds for opponent's search time limit. -1 means unlimited
         moves = [(x, y) for x in range(1, size + 1)
                  for y in range(1, size + 1)]
         self.initial = GameState(to_move='X', move=None, utility=0, board={}, moves=moves)
@@ -373,14 +373,14 @@ class TicTacToe(Game):
             return match
 
         # Maybe to accelerate, return 0 if number of pieces on board is less than half of board size:
-        #if len(state.moves) <= self.k / 2:
+        # if len(state.moves) <= self.k / 2:
         #    return 0
 
         print("Your code goes here 15pt.")
 
         return 0
 
-    #@staticmethod
+    # @staticmethod
     def k_in_row(self, board, pos, player, dir, k):
         """Return true if there is a line of k cells in direction dir including position pos on board for player."""
         (delta_x, delta_y) = dir

@@ -1,14 +1,10 @@
-import os.path
 from tkinter import *
-import sys
-import time
-
-
-#sys.path.append('../')
-#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from games import *
 from monteCarlo import *
+
+# sys.path.append('../')
+# sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 gBoard = None
 root = None
@@ -22,17 +18,18 @@ result = None
 choices = None
 gSize = 3
 
+
 def create_frames(root):
     """
     This function creates the necessary structure of the game.
     """
     global gBoard
     gBoard = TicTacToe(gSize, gSize, -1)
-   
+
     for _ in range(gSize):
         framei = Frame(root)
         create_buttons(framei)
-        framei.pack(side = BOTTOM)
+        framei.pack(side=BOTTOM)
         frames.append(framei)
 
     uiFrame = Frame(root)
@@ -72,11 +69,11 @@ def create_frames(root):
 
     timeStr = StringVar()
     timeStr.set(str("-1"))  # -1 means no time limit for search
-    
+
     def timerCallback(event):
         global gBoard
         dstr = event.widget.get().strip()
-        #print("Time limit in seconds: ", dstr)
+        # print("Time limit in seconds: ", dstr)
         if dstr.isdigit():
             if int(dstr) > 0:
                 print("Time limit in seconds: ", int(dstr))
@@ -84,10 +81,10 @@ def create_frames(root):
             else:
                 print("Warning! Timer value must be positive")
         return True
-    
-    timeEntry = Entry(timeFrame, width =7, textvariable=timeStr)
+
+    timeEntry = Entry(timeFrame, width=7, textvariable=timeStr)
     timeEntry.bind('<KeyRelease>', timerCallback)
-    timeEntry.pack(side = LEFT)
+    timeEntry.pack(side=LEFT)
 
 
 def create_buttons(frame):
@@ -97,19 +94,20 @@ def create_buttons(frame):
     buttons_in_frame = []
 
     for _ in range(gSize):
-        button = Button(frame, bg = "yellow", height=1, width=2, text=" ", padx=2, pady=2)
+        button = Button(frame, bg="yellow", height=1, width=2, text=" ", padx=2, pady=2)
         button.config(command=lambda btn=button: on_click(btn))
         button.pack(side=LEFT)
         buttons_in_frame.append(button)
 
     buttons.append(buttons_in_frame)
 
+
 def on_click(button):
     """
     This function determines the action of any button.
     """
     global gBoard, choices, count, sym, result, x_pos, o_pos
-    #print("onClick: button.text=", button['text'])
+    # print("onClick: button.text=", button['text'])
     if count % 2 == 0:
         sym = "X"
     else:
@@ -122,10 +120,10 @@ def on_click(button):
     x += 1
     y += 1
     x_pos.append((x, y))
-    state1 = gen_state((x, y), to_move=sym, x_positions=x_pos,  o_positions=o_pos, h=gBoard.k, v=gBoard.k)
+    state1 = gen_state((x, y), to_move=sym, x_positions=x_pos, o_positions=o_pos, h=gBoard.k, v=gBoard.k)
 
-    #check human player victory:
-    if gBoard.compute_utility(state1.board.copy(), (x, y), state1.to_move)==gBoard.k:
+    # check human player victory:
+    if gBoard.compute_utility(state1.board.copy(), (x, y), state1.to_move) == gBoard.k:
         result.set("You win :)")
         disable_game(state1)
         return
@@ -141,8 +139,8 @@ def on_click(button):
     count += 1
     state2 = gen_state((x, y), to_move=sym, x_positions=x_pos, o_positions=o_pos, h=gBoard.k, v=gBoard.k)
     a = b = None
-    #try:
-    if(len(state2.moves) > 0):
+    # try:
+    if len(state2.moves) > 0:
         choice = choices.get()
         if "Random" in choice:
             a, b = random_player(gBoard, state2)
@@ -154,11 +152,11 @@ def on_click(button):
             mcSearch = MCTS(gBoard, state2)
             a, b = mcSearch.monteCarloPlayer()
 
-    if a == None or b == None:
+    if a is None or b is None:
         disable_game(state2)
         result.set("It is a draw")
         return
-    
+
     if 1 <= a <= gSize and 1 <= b <= gSize:
         o_pos.append((a, b))
         button_to_change = get_button(a - 1, b - 1)
@@ -187,6 +185,7 @@ def get_coordinates(button):
             if buttons[x][y] == button:
                 return x, y
 
+
 def get_button(x, y):
     """
     This function returns the button location corresponding to a coordinate.
@@ -207,7 +206,7 @@ def reset_game():
     for x in frames:
         for y in x.winfo_children():
             y.config(text=" ", state='normal')
-    
+
     gBoard.reset()
 
 
@@ -233,7 +232,7 @@ def exit_game(root):
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         gSize = int(sys.argv[1])
-        gSize =  int(sys.argv[1])
+        gSize = int(sys.argv[1])
         gkmatch = int(sys.argv[1])
     else:
         gSize = 3
@@ -245,16 +244,16 @@ if __name__ == "__main__":
     width = gSize * 80
     height = gSize * 80
     geoStr = str(width) + "x" + str(height)
-    root.geometry(geoStr)  
+    root.geometry(geoStr)
     root.resizable(1, 1)  # To remove the maximize window option
     result = StringVar()
     result.set("Your Turn!")
-    w = Label(root, textvariable=result, fg = "brown")
+    w = Label(root, textvariable=result, fg="brown")
     w.pack(side=BOTTOM)
     create_frames(root)
     choices = StringVar(root)
     choices.set("Random")
     menu = OptionMenu(root, choices, "Random", "MinMax", "AlphaBeta", "MonteCarlo")
-    menu.pack(side=TOP) 
+    menu.pack(side=TOP)
 
     root.mainloop()
