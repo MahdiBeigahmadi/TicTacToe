@@ -207,6 +207,7 @@ def alpha_beta_player(game, state):
     try:
         while True:
             currentMove = alpha_beta_cutoff(game, state)
+            print(f"Searching at depth: {depth}")
             if currentMove is not None:
                 bestPossibleMove = currentMove
             if time.perf_counter() - start > game.timer:
@@ -232,6 +233,7 @@ def minmax_player(game, state):
     try:
         while True:
             currentMove = minmax_cutoff(game, state)
+            print(f"Searching at depth: {depth}")
             if currentMove is not None:
                 bestPossibleMove = currentMove
             if time.perf_counter() - start > game.timer:

@@ -64,7 +64,8 @@ class MCTS:  # Monte Carlo Tree Search implementation
             self.expandNode(nodeForExploration)
             simulationResult = self.simulateRandomPlay(nodeForExploration)
             self.backPropagation(nodeForExploration, simulationResult)
-
+        actualTimeSpent = time.perf_counter() - start
+        print(f"Time allotted: {timelimit}s, Time spent: {actualTimeSpent:.2f}s")
         winnerNode = self.root.getChildWithMaxScore()
         assert (winnerNode is not None)
         return winnerNode.state.move
