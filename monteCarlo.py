@@ -5,6 +5,8 @@ import sys
 import time
 from collections import namedtuple
 
+import numpy as np
+
 GameState = namedtuple('GameState', 'to_move, move, utility, board, moves')
 
 
@@ -14,6 +16,7 @@ def random_player(game, state):
 
 
 # MonteCarlo Tree Search support
+
 
 class MCTS:  # Monte Carlo Tree Search implementation
     class Node:
@@ -42,22 +45,16 @@ class MCTS:  # Monte Carlo Tree Search implementation
         """Entry point for Monte Carlo search"""
         start = time.perf_counter()
         end = start + timelimit
+
         """Use timer above to apply iterative deepening"""
         while time.perf_counter() < end:
             # count = 100  # use this and the next line for debugging. Just disable previous while and enable these 2 lines
             # while count >= 0:
             # count -= 1
-            # SELECT stage use selectNode()
-            print("Your code goes here -3pt")
-
-            # EXPAND stage
-            print("Your code goes here -2pt")
-
-            # SIMULATE stage using simuplateRandomPlay()
-            print("Your code goes here -3pt")
-
-            # BACKUP stage using backPropagation
-            print("Your code goes here -2pt")
+            nodeForExploration = self.selectNode(self.root)
+            self.expandNode(nodeForExploration)
+            simulationResult = self.simulateRandomPlay(nodeForExploration)
+            self.backPropagation(nodeForExploration, simulationResult)
 
         winnerNode = self.root.getChildWithMaxScore()
         assert (winnerNode is not None)
@@ -67,15 +64,24 @@ class MCTS:  # Monte Carlo Tree Search implementation
 
     def selectNode(self, nd):
         node = nd
-        print("Your code goes here -3pt")
+        while not self.isTerminalState(node.state.utility, node.state.moves):
+            if len(node.children) == 0:
+                self.expandNode(node)
+            else:
+                node = self.findBestNodeWithUCT(node)
         return node
 
     def findBestNodeWithUCT(self, nd):
         """finds the child node with the highest UCT. Parse nd's children and use uctValue() to collect uct's for the
         children....."""
-        childUCT = []
-        print("Your code goes here -2pt")
-        return None
+        bestValue = -np.inf
+        bestNode = None
+        for child in nd.children:
+            uctValue = self.uctValue(nd.visitCount, child.winScore, child.visitCount)
+            if uctValue > bestValue:
+                bestValue = uctValue
+                bestNode = child
+        return bestNode
 
     def uctValue(self, parentVisit, nodeScore, nodeVisit):
         """compute Upper Confidence Value for a node"""
@@ -93,24 +99,18 @@ class MCTS:  # Monte Carlo Tree Search implementation
             nd.children.append(childNode)
 
     def simulateRandomPlay(self, nd):
-        # first check win possibility for the current node:
-        winStatus = self.game.compute_utility(nd.state.board, nd.state.move, nd.state.board[nd.state.move])
-        if winStatus == self.game.k:  # means it is opponent's win
-            assert (nd.state.board[nd.state.move] == 'X')
-            if nd.parent is not None:
-                nd.parent.winScore = -sys.maxsize
-            return ('X' if winStatus > 0 else 'O')
-
-        """now roll out a random play down to a terminating state. """
-
-        tempState = copy.deepcopy(nd.state)  # to be used in the following random playout
-        to_move = tempState.to_move
-        print("Your code goes heren -5pt")
-
-        return ('X' if winStatus > 0 else 'O' if winStatus < 0 else 'N')  # 'N' means tie
+        currentState = nd.state
+        while not self.isTerminalState(currentState.utility, currentState.moves):
+            possibleMoves = self.game.actions(currentState)
+            if not possibleMoves:
+                break
+            move = random.choice(possibleMoves)
+            currentState = self.game.result(currentState, move)
+        return self.game.to_move(currentState)
 
     def backPropagation(self, nd, winningPlayer):
-        """propagate upword to update score and visit count from
-        the current leaf node to the root node."""
-        tempNode = nd
-        print("Your code goes here -5pt")
+        while nd is not None:
+            nd.visitCount += 1
+            if nd.state.to_move == winningPlayer:
+                nd.winScore += 1
+            nd = nd.parent

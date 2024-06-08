@@ -6,8 +6,8 @@ There are 3 other searches to implement: MinMax with Cutoff depth (uses Evaluati
 and MonteCarlo Tree search.
 There are various areas in games.py and montecarlo.py that you must implement. Each part has grade which is shown in the print statement just above it.
 
-1)You need to come up with a smart Evaluation function for the game. It has to give highest value to the board configuration which
-has the most potential for a win by the player. Find out what charactersics in a board current layout are more promising and then try to 
+1)You need to come up with a smart Evaluation function for the game. It has to give the highest value to the board configuration which
+has the most potential for a win by the player. Find out what characteristics in a board current layout are more promising and then try to
 quantify them. There are many ways to achieve this, use your game skill, creativity, and time. There are already a few suggestion in the function in game.py. 
 
 2) There is a timer and a depth GUI for limiting search time and limit depth search. Timer is used for iterative deepening. So when you set timer, the depth setting is not used in the code. When timer or depth is set to -1 it means no time limit and no depth limit.

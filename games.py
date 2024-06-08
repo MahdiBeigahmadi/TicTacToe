@@ -188,43 +188,51 @@ def random_player(game, state):
 
 
 def alpha_beta_player(game, state):
-    """uses alphaBeta prunning with minmax, or with cutoff version, for AI player"""
-    print("Your code goes here -2pt")
-    """Use a method to speed up at the start to avoid search down a long tree with not much outcome.
-    Hint: for speedup use random_player for start of the game when you see search time is too long"""
-
+    """Uses alpha-beta pruning with minmax, or with cutoff version, for AI player."""
     if game.timer < 0:
-        game.d = -1
         return alpha_beta(game, state)
 
     start = time.perf_counter()
-    end = start + game.timer
-    """use the above timer to implement iterative deepening using alpha_beta_cutoff() version"""
-    move = None
-    print("Your code goes here -10pt")
+    depth = 1
+    bestPossibleMove = None
+    try:
+        while True:
+            currentMove = alpha_beta_cutoff(game, state)
+            if currentMove is not None:
+                bestPossibleMove = currentMove
+            if time.perf_counter() - start > game.timer:
+                break
+            depth += 1
+    except TimeoutError:
+        pass
 
-    print("iterative deepening to depth: ", game.d)
-    return move
+    print("Iterative deepening to depth:", depth)
+    return bestPossibleMove
 
 
 def minmax_player(game, state):
     """uses minmax or minmax with cutoff depth, for AI player"""
-    print("Your code goes here -3pt")
     """Use a method to speed up at the start to avoid search down a long tree with not much outcome.
     Hint:for speedup use random_player for start of the game when you see search time is too long"""
-
     if game.timer < 0:
-        game.d = -1
         return minmax(game, state)
 
     start = time.perf_counter()
-    end = start + game.timer
-    """use the above timer to implement iterative deepening using minmax_cutoff() version"""
-    move = None
-    print("Your code goes here -10pt")
+    depth = 1
+    bestPossibleMove = None
+    try:
+        while True:
+            currentMove = minmax_cutoff(game, state)
+            if currentMove is not None:
+                bestPossibleMove = currentMove
+            if time.perf_counter() - start > game.timer:
+                break
+            depth += 1
+    except TimeoutError:
+        pass
 
-    print("iterative deepening to depth: ", game.d)
-    return move
+    print("Iterative deepening to depth:", depth)
+    return bestPossibleMove
 
 
 # ______________________________________________________________________________
@@ -366,22 +374,27 @@ class TicTacToe(Game):
 
         def possiblekComplete(move, board, player, k):
             """if move can complete a line of count items, return 1 for 'X' player and -1 for 'O' player"""
-            match = self.k_in_row(board, move, player, (0, 1), k)
-            match = match + self.k_in_row(board, move, player, (1, 0), k)
-            match = match + self.k_in_row(board, move, player, (1, -1), k)
-            match = match + self.k_in_row(board, move, player, (1, 1), k)
+            match = TicTacToe.k_in_row(board, move, player, (0, 1), k)
+            match = match + TicTacToe.k_in_row(board, move, player, (1, 0), k)
+            match = match + TicTacToe.k_in_row(board, move, player, (1, -1), k)
+            match = match + TicTacToe.k_in_row(board, move, player, (1, 1), k)
             return match
 
         # Maybe to accelerate, return 0 if number of pieces on board is less than half of board size:
         # if len(state.moves) <= self.k / 2:
         #    return 0
 
-        print("Your code goes here 15pt.")
+        total = 0
+        for x in range(1, self.size + 1):
+            for y in range(1, self.size + 1):
+                if state.board.get((x, y)) == state.to_move:
+                    total += possiblekComplete((x, y), state.board, state.to_move, self.k - 1)
+                elif state.board.get((x, y)) == self.switchPlayer(state.to_move):
+                    total -= possiblekComplete((x, y), state.board, self.switchPlayer(state.to_move), self.k - 1)
+        return total
 
-        return 0
-
-    # @staticmethod
-    def k_in_row(self, board, pos, player, dir, k):
+    @staticmethod
+    def k_in_row(board, pos, player, dir, k):
         """Return true if there is a line of k cells in direction dir including position pos on board for player."""
         (delta_x, delta_y) = dir
         x, y = pos
