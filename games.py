@@ -6,6 +6,15 @@ from collections import namedtuple
 
 import numpy as np
 
+"""
+// Student Info
+// ------------
+//
+// Name : <mahdi beigahmadi>
+// St.# : <301570853>
+// Email: <mba188@sfu.ca>
+//
+"""
 GameState = namedtuple('GameState', 'to_move, move, utility, board, moves')
 
 

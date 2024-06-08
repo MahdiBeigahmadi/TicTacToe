@@ -13,6 +13,16 @@ from statistics import mean
 
 import numpy as np
 
+"""
+// Student Info
+// ------------
+//
+// Name : <mahdi beigahmadi>
+// St.# : <301570853>
+// Email: <mba188@sfu.ca>
+//
+"""
+
 
 # ______________________________________________________________________________
 # Functions on Sequences and Iterables

@@ -5,7 +5,15 @@ from monteCarlo import *
 
 # sys.path.append('../')
 # sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
+"""
+// Student Info
+// ------------
+//
+// Name : <mahdi beigahmadi>
+// St.# : <301570853>
+// Email: <mba188@sfu.ca>
+//
+"""
 gBoard = None
 root = None
 buttons = []
