@@ -1,0 +1,1 @@
+in order to test eval1 function you should add TicTacToe.eval1(state) in where that requires the usage of this function.

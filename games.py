@@ -372,6 +372,7 @@ class TicTacToe(Game):
             return 0
 
     # evaluation function, version 1
+    @staticmethod
     def eval1(self, state):
         """design and implement evaluation function for state.
         Some ideas: 1-use the number of k-1 matches for X and O For this you can use function possibleKComplete().
