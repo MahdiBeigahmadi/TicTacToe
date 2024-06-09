@@ -60,10 +60,19 @@ class MCTS:  # Monte Carlo Tree Search implementation
             # count = 100  # use this and the next line for debugging. Just disable previous while and enable these 2 lines
             # while count >= 0:
             # count -= 1
+
+            # SELECT stage use selectNode()
             nodeForExploration = self.selectNode(self.root)
+
+            # EXPAND stage
             self.expandNode(nodeForExploration)
+
+            # SIMULATE stage using simuplateRandomPlay()
             simulationResult = self.simulateRandomPlay(nodeForExploration)
+
+            # BACKUP stage using backPropagation
             self.backPropagation(nodeForExploration, simulationResult)
+
         actualTimeSpent = time.perf_counter() - start
         print(f"Time allotted: {timelimit}s, Time spent: {actualTimeSpent:.2f}s")
         winnerNode = self.root.getChildWithMaxScore()
