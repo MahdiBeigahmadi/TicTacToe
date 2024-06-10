@@ -55,39 +55,55 @@ class MCTS:  # Monte Carlo Tree Search implementation
         start = time.perf_counter()
         end = start + timelimit
 
+        depth = 1  # Starting depth for iterative deepening
+        bestPossibleMove = None
+
         """Use timer above to apply iterative deepening"""
+        while time.perf_counter() < end:
+            self.root.visitCount = 0
+            self.runMCTS(end, depth)
+            depth += 1
+            bestPossibleMove = self.root.getChildWithMaxScore().state.move
+            print(f"Best move at depth {depth - 1}: {bestPossibleMove}")
+
+        actualTimeSpent = time.perf_counter() - start
+        print(f"Time allotted: {timelimit}s, Time spent: {actualTimeSpent:.2f}s, Depth reached: {depth - 1}")
+        return bestPossibleMove
+
+    def runMCTS(self, end, depth):
         while time.perf_counter() < end:
             # count = 100  # use this and the next line for debugging. Just disable previous while and enable these 2 lines
             # while count >= 0:
             # count -= 1
 
             # SELECT stage use selectNode()
-            nodeForExploration = self.selectNode(self.root)
+            nodeForExploration = self.selectNode(self.root, depth)
+            print(f"Selected node for exploration: {nodeForExploration.state.move}")
 
             # EXPAND stage
             self.expandNode(nodeForExploration)
+            print(
+                f"Expanded node: {nodeForExploration.state.move} with children: {[child.state.move for child in nodeForExploration.children]}")
 
             # SIMULATE stage using simuplateRandomPlay()
             simulationResult = self.simulateRandomPlay(nodeForExploration)
+            print(f"Simulation result: {simulationResult}")
 
             # BACKUP stage using backPropagation
             self.backPropagation(nodeForExploration, simulationResult)
-
-        actualTimeSpent = time.perf_counter() - start
-        print(f"Time allotted: {timelimit}s, Time spent: {actualTimeSpent:.2f}s")
-        winnerNode = self.root.getChildWithMaxScore()
-        assert (winnerNode is not None)
-        return winnerNode.state.move
+            print(f"Backpropagation completed for node: {nodeForExploration.state.move}")
 
     """selection stage function. walks down the tree using findBestNodeWithUCT()"""
 
-    def selectNode(self, nd):
+    def selectNode(self, nd, depth):
         node = nd
-        while not self.isTerminalState(node.state.utility, node.state.moves):
+        currentDepth = 0
+        while not self.isTerminalState(node.state.utility, node.state.moves) and currentDepth < depth:
             if len(node.children) == 0:
                 self.expandNode(node)
             else:
                 node = self.findBestNodeWithUCT(node)
+            currentDepth += 1
         return node
 
     def findBestNodeWithUCT(self, nd):
