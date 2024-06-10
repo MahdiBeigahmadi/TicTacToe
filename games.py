@@ -138,37 +138,37 @@ def alpha_beta(game, state):
 
 def alpha_beta_cutoff(game, state):
     """Search game to determine best action; use alpha-beta pruning.
-    This version cuts off search and uses an evaluation function."""
-    player = game.to_move(state)
+       This version cuts off search and uses an evaluation function."""
+    game.to_move(state)
 
-    def max_value(state, alpha, beta):
-        if game.terminal_test(state):
-            return game.utility(state, player), None
+    def max_value(state, alpha, beta, depth):
+        if game.terminal_test(state) or depth == 0:
+            return game.evaluation_func(state), None
         value, move = -np.inf, None
         for action in game.actions(state):
-            secondaryValue, _ = min_value(game.result(state, action), alpha, beta)
-            if secondaryValue > value:
-                value, move = secondaryValue, action
+            newValue, _ = min_value(game.result(state, action), alpha, beta, depth - 1)
+            if newValue > value:
+                value, move = newValue, action
                 alpha = max(alpha, value)
-            if value >= beta:  # beta cut-off
+            if value >= beta:
                 break
         return value, move
 
-    def min_value(state, alpha, beta):
-        if game.terminal_test(state):
-            return game.utility(state, player), None
+    def min_value(state, alpha, beta, depth):
+        if game.terminal_test(state) or depth == 0:
+            return game.evaluation_func(state), None
         value, move = np.inf, None
         for action in game.actions(state):
-            secondaryValue, _ = max_value(game.result(state, action), alpha, beta)
-            if secondaryValue < value:
-                value, move = secondaryValue, action
+            newValue, _ = max_value(game.result(state, action), alpha, beta, depth - 1)
+            if newValue < value:
+                value, move = newValue, action
                 beta = min(beta, value)
-            if value <= alpha:  # alpha cut-off
+            if value <= alpha:
                 break
         return value, move
 
-    _, best_move = max_value(state, -np.inf, np.inf)
-    return best_move
+    _, bestMove = max_value(state, -np.inf, np.inf, game.d)
+    return bestMove
 
 
 # ______________________________________________________________________________

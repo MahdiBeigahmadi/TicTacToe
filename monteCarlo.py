@@ -55,7 +55,7 @@ class MCTS:  # Monte Carlo Tree Search implementation
         start = time.perf_counter()
         end = start + timelimit
 
-        depth = 1  # Starting depth for iterative deepening
+        depth = 1
         bestPossibleMove = None
 
         """Use timer above to apply iterative deepening"""
