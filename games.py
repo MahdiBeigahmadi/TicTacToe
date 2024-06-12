@@ -71,7 +71,7 @@ def minmax_cutoff(game, state):
         if game.terminal_test(state):
             return game.utility(state, game.to_move(state))
         if d == 0:
-            return game.evaluation_func(state)
+            return game.eval1(state)
         v = -np.inf
         for a in game.actions(state):
             v = max(v, min_value(game.result(state, a), d - 1))
@@ -81,7 +81,7 @@ def minmax_cutoff(game, state):
         if game.terminal_test(state):
             return game.utility(state, game.to_move(state))
         if d == 0:
-            return game.evaluation_func(state)
+            return game.eval1(state)
         v = np.inf
         for a in game.actions(state):
             v = min(v, max_value(game.result(state, a), d - 1))
@@ -143,7 +143,7 @@ def alpha_beta_cutoff(game, state):
 
     def max_value(state, alpha, beta, depth):
         if game.terminal_test(state) or depth == 0:
-            return game.evaluation_func(state), None
+            return game.eval1(state), None
         value, move = -np.inf, None
         for action in game.actions(state):
             newValue, _ = min_value(game.result(state, action), alpha, beta, depth - 1)
@@ -156,7 +156,7 @@ def alpha_beta_cutoff(game, state):
 
     def min_value(state, alpha, beta, depth):
         if game.terminal_test(state) or depth == 0:
-            return game.evaluation_func(state), None
+            return game.eval1(state), None
         value, move = np.inf, None
         for action in game.actions(state):
             newValue, _ = max_value(game.result(state, action), alpha, beta, depth - 1)
