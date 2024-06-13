@@ -66,15 +66,24 @@ def minmax(game, state):
 def minmax_cutoff(game, state, depth):
     """Given a state in a game, calculate the best move by searching
     forward to the given cutoff depth. At that level, use the evaluation function."""
+    memoryForOptimization = {}
+
+    def convertTheStatesIntoHashes(state, depth):
+        """Create a hashable representation of the state and depth."""
+        return state.to_move, tuple(sorted(state.board.items())), state.utility, depth
 
     def max_value(state, d):
         if game.terminal_test(state):
             return game.utility(state, game.to_move(state))
         if d == 0:
             return game.eval1(state)
+        hashState = convertTheStatesIntoHashes(state, d)
+        if hashState in memoryForOptimization:
+            return memoryForOptimization[hashState]
         v = -np.inf
-        for a in game.actions(state):
+        for a in sorted(game.actions(state), key=lambda x: heuristic(game, state, x), reverse=True):
             v = max(v, min_value(game.result(state, a), d - 1))
+        memoryForOptimization[hashState] = v
         return v
 
     def min_value(state, d):
@@ -82,10 +91,18 @@ def minmax_cutoff(game, state, depth):
             return game.utility(state, game.to_move(state))
         if d == 0:
             return game.eval1(state)
+        hashState = convertTheStatesIntoHashes(state, d)
+        if hashState in memoryForOptimization:
+            return memoryForOptimization[hashState]
         v = np.inf
-        for a in game.actions(state):
+        for a in sorted(game.actions(state), key=lambda x: heuristic(game, state, x)):
             v = min(v, max_value(game.result(state, a), d - 1))
+        memoryForOptimization[hashState] = v
         return v
+
+    def heuristic(game, state, move):
+        next_state = game.result(state, move)
+        return game.utility(next_state, game.to_move(state))
 
     highestScore = -np.inf
     bestPossibleAction = None
