@@ -63,9 +63,9 @@ def minmax(game, state):
     return max(game.actions(state), key=lambda a: min_value(game.result(state, a)), default=None)
 
 
-def minmax_cutoff(game, state):
+def minmax_cutoff(game, state, depth):
     """Given a state in a game, calculate the best move by searching
-    forward all the way to the cutoff depth. At that level use evaluation func."""
+    forward to the given cutoff depth. At that level, use the evaluation function."""
 
     def max_value(state, d):
         if game.terminal_test(state):
@@ -87,7 +87,6 @@ def minmax_cutoff(game, state):
             v = min(v, max_value(game.result(state, a), d - 1))
         return v
 
-    depth = game.d if game.d > 0 else np.inf
     highestScore = -np.inf
     bestPossibleAction = None
     for a in game.actions(state):
@@ -136,10 +135,9 @@ def alpha_beta(game, state):
     return best_move
 
 
-def alpha_beta_cutoff(game, state):
+def alpha_beta_cutoff(game, state, depth):
     """Search game to determine best action; use alpha-beta pruning.
-       This version cuts off search and uses an evaluation function."""
-    game.to_move(state)
+       This version cuts off search at a given depth and uses an evaluation function."""
 
     def max_value(state, alpha, beta, depth):
         if game.terminal_test(state) or depth == 0:
@@ -149,7 +147,7 @@ def alpha_beta_cutoff(game, state):
             newValue, _ = min_value(game.result(state, action), alpha, beta, depth - 1)
             if newValue > value:
                 value, move = newValue, action
-                alpha = max(alpha, value)
+            alpha = max(alpha, value)
             if value >= beta:
                 break
         return value, move
@@ -162,12 +160,12 @@ def alpha_beta_cutoff(game, state):
             newValue, _ = max_value(game.result(state, action), alpha, beta, depth - 1)
             if newValue < value:
                 value, move = newValue, action
-                beta = min(beta, value)
+            beta = min(beta, value)
             if value <= alpha:
                 break
         return value, move
 
-    _, bestMove = max_value(state, -np.inf, np.inf, game.d)
+    _, bestMove = max_value(state, -np.inf, np.inf, depth)
     return bestMove
 
 
@@ -204,45 +202,43 @@ def alpha_beta_player(game, state):
     start = time.perf_counter()
     depth = 1
     bestPossibleMove = None
-    try:
-        while True:
-            currentMove = alpha_beta_cutoff(game, state)
-            print(f"Searching at depth: {depth}")
-            if currentMove is not None:
-                bestPossibleMove = currentMove
-            if time.perf_counter() - start > game.timer:
-                break
-            depth += 1
-    except TimeoutError:
-        pass
 
-    print("Iterative deepening to depth:", depth)
+    while True:
+        currentMove = alpha_beta_cutoff(game, state, depth)
+        print(f"Searching at depth: {depth}, Time elapsed: {time.perf_counter() - start}s")
+
+        if currentMove is not None:
+            bestPossibleMove = currentMove
+
+        if time.perf_counter() - start > game.timer:
+            print(f"Breaking out of loop after {depth} depths due to time limit.")
+            break
+
+        depth += 1
+
+    print(f"Iterative deepening reached depth: {depth}")
     return bestPossibleMove
 
 
 def minmax_player(game, state):
-    """uses minmax or minmax with cutoff depth, for AI player"""
-    """Use a method to speed up at the start to avoid search down a long tree with not much outcome.
-    Hint:for speedup use random_player for start of the game when you see search time is too long"""
+    """Uses minimax or minimax with cutoff depth for AI player."""
     if game.timer < 0:
         return minmax(game, state)
 
     start = time.perf_counter()
     depth = 1
     bestPossibleMove = None
-    try:
-        while True:
-            currentMove = minmax_cutoff(game, state)
-            print(f"Searching at depth: {depth}")
-            if currentMove is not None:
-                bestPossibleMove = currentMove
-            if time.perf_counter() - start > game.timer:
-                break
-            depth += 1
-    except TimeoutError:
-        pass
 
-    print("Iterative deepening to depth:", depth)
+    while True:
+        print(f"Searching at depth: {depth}")
+        currentMove = minmax_cutoff(game, state, depth)
+        if currentMove is not None:
+            bestPossibleMove = currentMove
+        if time.perf_counter() - start > game.timer:
+            break
+        depth += 1
+
+    print(f"Iterative deepening reached depth: {depth}")
     return bestPossibleMove
 
 
@@ -372,7 +368,7 @@ class TicTacToe(Game):
             return 0
 
     # evaluation function, version 1
-    @staticmethod
+
     def eval1(self, state):
         """design and implement evaluation function for state.
         Some ideas: 1-use the number of k-1 matches for X and O For this you can use function possibleKComplete().
