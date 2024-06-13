@@ -131,8 +131,8 @@ def alpha_beta(game, state):
                 return value, move
         return value, move
 
-    _, best_move = max_value(state, -np.inf, np.inf)
-    return best_move
+    _, bestMoveForAlphaBeta = max_value(state, -np.inf, np.inf)
+    return bestMoveForAlphaBeta
 
 
 def alpha_beta_cutoff(game, state, depth):
@@ -377,7 +377,7 @@ class TicTacToe(Game):
             """
 
         """ computes number of (k-1) completed matches. This means number of row or columns or diagonals 
-        which include player position and in which k-1 spots are occuppied by player.
+        which include player position and in which k-1 spots are occupied by player.
         """
 
         def possiblekComplete(move, board, player, k):
