@@ -387,36 +387,51 @@ class TicTacToe(Game):
     # evaluation function, version 1
 
     def eval1(self, state):
-        """design and implement evaluation function for state.
-        Some ideas: 1-use the number of k-1 matches for X and O For this you can use function possibleKComplete().
-            : 2- expand it for all k matches
-            : 3- include double matches where one move can generate 2 matches.
-            """
+        def evaluateScoreLines(segment, player):
+            opponent = 'O' if player == 'X' else 'X'
+            playerCount = segment.count(player)
+            opponentCount = segment.count(opponent)
 
-        """ computes number of (k-1) completed matches. This means number of row or columns or diagonals 
-        which include player position and in which k-1 spots are occupied by player.
-        """
+            scores = {i: 10 ** i for i in range(1, self.k)}
 
-        def possiblekComplete(move, board, player, k):
-            """if move can complete a line of count items, return 1 for 'X' player and -1 for 'O' player"""
-            match = TicTacToe.k_in_row(board, move, player, (0, 1), k)
-            match = match + TicTacToe.k_in_row(board, move, player, (1, 0), k)
-            match = match + TicTacToe.k_in_row(board, move, player, (1, -1), k)
-            match = match + TicTacToe.k_in_row(board, move, player, (1, 1), k)
-            return match
+            if playerCount > 0 and opponentCount == 0:
 
-        # Maybe to accelerate, return 0 if number of pieces on board is less than half of board size:
-        # if len(state.moves) <= self.k / 2:
-        #    return 0
+                if playerCount == self.k - 1:
+                    return scores.get(playerCount, 0)
+                else:
+                    return scores.get(playerCount, 0)
+            elif opponentCount > 0 and playerCount == 0:
 
-        total = 0
-        for x in range(1, self.size + 1):
-            for y in range(1, self.size + 1):
-                if state.board.get((x, y)) == state.to_move:
-                    total += possiblekComplete((x, y), state.board, state.to_move, self.k - 1)
-                elif state.board.get((x, y)) == self.switchPlayer(state.to_move):
-                    total -= possiblekComplete((x, y), state.board, self.switchPlayer(state.to_move), self.k - 1)
-        return total
+                if opponentCount == self.k - 1:
+                    return -scores.get(opponentCount, 0)
+                else:
+                    return -scores.get(opponentCount, 0)
+
+            return 0
+
+        utility = 0
+        size = self.size
+        board = state.board
+        gameLines = []
+
+        for i in range(1, size + 1):
+            row = [board.get((i, j), '.') for j in range(1, size + 1)]
+            column = [board.get((j, i), '.') for j in range(1, size + 1)]
+            gameLines.append(row)
+            gameLines.append(column)
+
+        firstDiagonal = [board.get((i, i), '.') for i in range(1, size + 1)]
+        secondDiagonal = [board.get((i, size - i + 1), '.') for i in range(1, size + 1)]
+        if len(firstDiagonal) >= self.k:
+            gameLines.append(firstDiagonal)
+        if len(secondDiagonal) >= self.k:
+            gameLines.append(secondDiagonal)
+
+        currentPlayer = state.to_move
+        for line in gameLines:
+            utility += evaluateScoreLines(line, currentPlayer)
+
+        return utility
 
     @staticmethod
     def k_in_row(board, pos, player, dir, k):
