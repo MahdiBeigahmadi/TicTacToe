@@ -101,8 +101,8 @@ def minmax_cutoff(game, state, depth):
         return v
 
     def heuristic(game, state, move):
-        next_state = game.result(state, move)
-        return game.utility(next_state, game.to_move(state))
+        nextState = game.result(state, move)
+        return game.utility(nextState, game.to_move(state))
 
     highestScore = -np.inf
     bestPossibleAction = None
@@ -392,20 +392,12 @@ class TicTacToe(Game):
             playerCount = segment.count(player)
             opponentCount = segment.count(opponent)
 
-            scores = {i: 10 ** i for i in range(1, self.k)}
+            scores = {index: 10 ** index for index in range(1, self.k)}
 
             if playerCount > 0 and opponentCount == 0:
-
-                if playerCount == self.k - 1:
-                    return scores.get(playerCount, 0)
-                else:
-                    return scores.get(playerCount, 0)
+                return scores.get(playerCount, 0)
             elif opponentCount > 0 and playerCount == 0:
-
-                if opponentCount == self.k - 1:
-                    return -scores.get(opponentCount, 0)
-                else:
-                    return -scores.get(opponentCount, 0)
+                return -scores.get(opponentCount, 0)
 
             return 0
 
@@ -420,12 +412,20 @@ class TicTacToe(Game):
             gameLines.append(row)
             gameLines.append(column)
 
-        firstDiagonal = [board.get((i, i), '.') for i in range(1, size + 1)]
-        secondDiagonal = [board.get((i, size - i + 1), '.') for i in range(1, size + 1)]
-        if len(firstDiagonal) >= self.k:
-            gameLines.append(firstDiagonal)
-        if len(secondDiagonal) >= self.k:
-            gameLines.append(secondDiagonal)
+        for start in range(1, size - self.k + 2):
+            primaryDiag1 = [board.get((start + i, i + 1), '.') for i in range(size - start + 1)]
+            secondaryDiag1 = [board.get((i + 1, start + i), '.') for i in range(size - start + 1)]
+            primaryDiag2 = [board.get((i + 1, start + size - 1 - i), '.') for i in range(size - start + 1)]
+            secondaryDiag2 = [board.get((start + i, size - i), '.') for i in range(size - start + 1)]
+
+            if len(primaryDiag1) >= self.k:
+                gameLines.append(primaryDiag1)
+            if len(secondaryDiag1) >= self.k:
+                gameLines.append(secondaryDiag1)
+            if len(primaryDiag2) >= self.k:
+                gameLines.append(primaryDiag2)
+            if len(secondaryDiag2) >= self.k:
+                gameLines.append(secondaryDiag2)
 
         currentPlayer = state.to_move
         for line in gameLines:
