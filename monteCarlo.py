@@ -133,19 +133,29 @@ class MCTS:  # Monte Carlo Tree Search implementation
             childNode = self.Node(self.game.result(tempState, a), nd)
             nd.children.append(childNode)
 
-    def simulateRandomPlay(self, nd):
-        currentState = nd.state
+    def simulateRandomPlay(self, node):
+        isItWinner = self.game.compute_utility(node.state.board, node.state.move, node.state.board[node.state.move])
+        if isItWinner == self.game.k:
+            assert (node.state.board[node.state.move] == 'X')
+            if node.parent is not None:
+                node.parent.winScore = -sys.maxsize
+            return 'X' if isItWinner > 0 else 'O'
+
+        currentState = copy.deepcopy(node.state)
+
         while not self.isTerminalState(currentState.utility, currentState.moves):
-            possibleMoves = self.game.actions(currentState)
-            if not possibleMoves:
-                break
-            move = random.choice(possibleMoves)
+            move = random.choice(currentState.moves)
             currentState = self.game.result(currentState, move)
-        return self.game.to_move(currentState)
+
+        isItWinner = self.game.compute_utility(currentState.board, currentState.move,
+                                               currentState.board[currentState.move])
+
+        return 'X' if isItWinner > 0 else 'O' if isItWinner < 0 else 'N'
 
     def backPropagation(self, nd, winningPlayer):
-        while nd is not None:
-            nd.visitCount += 1
-            if nd.state.to_move == winningPlayer:
-                nd.winScore += 1
-            nd = nd.parent
+        tempNode = nd
+        while tempNode is not None:
+            tempNode.visitCount += 1
+            if tempNode.state.to_move != winningPlayer:
+                tempNode.winScore += 1
+            tempNode = tempNode.parent
